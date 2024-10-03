@@ -1,1 +1,10 @@
-<p><lib-tm-ng-odometer [number]="2000" [theme]="'default'"></lib-tm-ng-odometer></p>
+<h1>Odometer for Angular 17+</h1>
+<p><tm-ng-odometer [number]="number" [theme]="'default'"></tm-ng-odometer></p> <!-- this trigger right away -->
+<p><tm-ng-odometer [number]="2000" [config]="{ auto: false }" [observable]="observable" [theme]="'default'"></tm-ng-odometer></p>
+<p><tm-ng-odometer [number]="2000" [config]="{ auto: false }" [observable]="observable" [theme]="'minimal'"></tm-ng-odometer></p>
+<p><tm-ng-odometer [number]="2000" [config]="{ auto: false }" [observable]="observable" [theme]="'car'"></tm-ng-odometer></p>
+<p><tm-ng-odometer [number]="2000" [config]="{ auto: false }" [observable]="observable" [theme]="'plaza'"></tm-ng-odometer></p>
+<p><tm-ng-odometer [number]="2000" [config]="{ auto: false }" [observable]="observable" [theme]="'slot-machine'"></tm-ng-odometer></p>
+<p><tm-ng-odometer [number]="2000" [config]="{ auto: false }" [observable]="observable" [theme]="'train-station'"></tm-ng-odometer></p>
+<p><tm-ng-odometer [number]="2000" [config]="{ auto: false }" [observable]="observable" [theme]="'digital'"></tm-ng-odometer></p>
+<p><button (click)="trigger()">Trigger</button></p>

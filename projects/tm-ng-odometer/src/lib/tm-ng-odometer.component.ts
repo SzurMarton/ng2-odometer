@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewEncapsulation, input, viewChild, effect, computed, Signal } from '@angular/core';
 import { CAR_THEME, DEFAULT_THEME, DIGITAL_THEME, MINIMAL_THEME, PLAZA_THEME, SLOT_MACHINE_THEME, TRAIN_STATION_THEME } from './themes';
 // @ts-ignore
 import Odometer from 'tm-odometer';
@@ -7,7 +7,7 @@ import { OdometerModel } from './odometer.model';
 import { TmNgOdometerConfig, TmNgOdometerConfigModel } from './odometer.config';
 
 @Component({
-    selector: 'lib-tm-ng-odometer',
+    selector: 'tm-ng-odometer',
     encapsulation: ViewEncapsulation.None,
     standalone: true,
     imports: [],
@@ -37,21 +37,21 @@ import { TmNgOdometerConfig, TmNgOdometerConfigModel } from './odometer.config';
     `,
     ],
 })
-export class TmNgOdometerComponent implements OnInit, OnDestroy, OnChanges, AfterViewInit {
+export class TmNgOdometerComponent implements OnInit, OnDestroy, AfterViewInit {
     private subscription: Subscription;
     private odometer: OdometerModel;
-    @ViewChild('container', { read: ElementRef, static: true }) container: ElementRef;
-    @Input() number: number; // Required
-    @Input() config: TmNgOdometerConfigModel = {};
-    @Input() observable: Observable<boolean> = undefined;
+    container = viewChild<ElementRef>('container');
+    number = input.required<number>(); // Required
+    config = input<TmNgOdometerConfigModel>({});
+    observable = input<Observable<boolean>>();
 
     // Individual configuration attributes
-    @Input() animation: string = undefined;
-    @Input() format: string = undefined;
-    @Input() theme: string = undefined;
-    @Input() value: number = undefined;
-    @Input() duration: number = undefined;
-    @Input() auto: boolean = undefined;
+    animation = input<string>();
+    format = input<string>();
+    theme = input<string>();
+    value = input<number>();
+    duration = input<number>();
+    auto = input<boolean>();
 
     // Available themes
     private themes: Array<string> = [
@@ -64,74 +64,50 @@ export class TmNgOdometerComponent implements OnInit, OnDestroy, OnChanges, Afte
         'train-station'
     ];
 
-    // Start Odometer
-    private initOdometer() {
-        if (this.container !== undefined && typeof Odometer !== 'undefined') {
-            this.odometer = new Odometer({
-                el: this.container.nativeElement,
-                animation: this.config.animation,
-                value: this.config.value,
-                duration: this.config.duration,
-                format: this.config.format,
-                theme: this.config.theme,
-            });
+    private configSignal: Signal<TmNgOdometerConfigModel> = computed(() => {
+        const config = new TmNgOdometerConfig();
+        return {
+            ...config,
+            ...this.config(),
+            animation: this.animation() ?? this.config().animation ?? config.animation,
+            format: this.format() ?? this.config().format ?? config.format,
+            theme: this.themes.includes(this.theme() ?? '') ? this.theme() : (this.config().theme ?? 'default'),
+            value: this.value() ?? this.config().value ?? config.value,
+            duration: this.duration() ?? this.config().duration ?? config.duration,
+            auto: this.auto() ?? this.config().auto ?? config.auto,
+        };
+    });
 
-            if (this.number !== undefined && this.config.auto) {
-                this.odometer.update(this.number);
+    constructor() {
+        effect(() => {
+            if (this.odometer && this.configSignal().auto) {
+                this.odometer.update(this.number());
             }
-        }
+        });
     }
 
-    private initConfig() {
-        this.config = { ...new TmNgOdometerConfig(), ...this.config };
+    // Start Odometer
+    private initOdometer() {
+        if (this.container() !== undefined && typeof Odometer !== 'undefined') {
+            this.odometer = new Odometer({
+                el: this.container().nativeElement,
+                ...this.configSignal()
+            });
 
-        // Animation
-        if (this.animation !== undefined) {
-            this.config.animation = this.animation;
-        }
-
-        // Format
-        if (this.format !== undefined) {
-            this.config.format = this.format;
-        }
-
-        // Theme
-        if (this.theme !== undefined) {
-            this.config.theme = this.themes.includes(this.theme) ? this.theme : 'default';
-        }
-
-        // Value
-        if (this.value !== undefined) {
-            this.config.value = this.value;
-        }
-
-        // Duration
-        if (this.duration !== undefined) {
-            this.config.duration = this.duration;
-        }
-
-        // Auto
-        if (this.auto !== undefined) {
-            this.config.auto = this.auto;
-        }
-
-        // Validate theme. If not part of the
-        // available themes array, use the default
-        if (!this.themes.includes(this.config.theme)) {
-            this.config.theme = 'default';
+            if (this.number() !== undefined && this.configSignal().auto) {
+                this.odometer.update(this.number());
+            }
         }
     }
     
     ngOnInit(): void {
-        if (this.observable !== undefined && !this.config.auto) {
-            this.subscription = this.observable.subscribe((trigger: boolean) => {
+        if (this.observable() !== undefined && !this.configSignal().auto) {
+            this.subscription = this.observable().subscribe((trigger: boolean) => {
                 if (trigger !== undefined && trigger) {
-                    this.odometer.update(this.number);
+                    this.odometer.update(this.number());
                 }
             });
         }
-
-        this.initConfig();
     }
 
     ngOnDestroy(): void {
@@ -140,14 +116,7 @@ export class TmNgOdometerComponent implements OnInit, OnDestroy, OnChanges, Afte
         }
     }
 
-    ngOnChanges(changes: SimpleChanges): void {
-        if (this.number !== undefined && this.odometer !== undefined && this.config.auto) {
-            this.odometer.update(this.number);
-        }
-    }
-
     ngAfterViewInit(): void {
         this.initOdometer();
     }
-
 }
