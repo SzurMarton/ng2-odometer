@@ -1,7 +1,3 @@
-/**
- * Created by Jose Andres on 6.15.17
- */
-
 export interface TmNgOdometerConfigModel {
     animation?: string;
     format?: string;
