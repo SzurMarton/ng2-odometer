@@ -7,7 +7,6 @@
   },
   "dependencies": {
     "tslib": "^2.3.0",
-    "lodash": "^4.x",
     "tm-odometer": "^1.0.6"
   },
   "sideEffects": false
