@@ -3,3 +3,4 @@
  */
 
 export * from './lib/tm-ng-odometer.component';
+export * from './lib/tm-ng-odometer.config';

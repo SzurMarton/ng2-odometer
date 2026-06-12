@@ -14,6 +14,7 @@ describe('TmNgOdometerComponent', () => {
     
     fixture = TestBed.createComponent(TmNgOdometerComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('number', 1000);
     fixture.detectChanges();
   });
 

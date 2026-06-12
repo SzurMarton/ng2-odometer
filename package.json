@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
+    "start": "ng serve demo",
+    "build": "ng build tm-ng-odometer --configuration production",
+    "watch": "ng build tm-ng-odometer --watch --configuration development",
     "test": "ng test"
   },
   "private": true,
@@ -19,7 +19,7 @@
     "@angular/platform-browser-dynamic": "^17.3.0",
     "@angular/router": "^17.3.0",
     "rxjs": "~7.8.0",
-    "tm-odometer": "^1.0.6",
+    "tm-odometer": "^2.x",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.3"
   },

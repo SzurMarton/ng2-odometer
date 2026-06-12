@@ -1,10 +1,8 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewEncapsulation, input, viewChild, effect, computed, Signal } from '@angular/core';
 import { CAR_THEME, DEFAULT_THEME, DIGITAL_THEME, MINIMAL_THEME, PLAZA_THEME, SLOT_MACHINE_THEME, TRAIN_STATION_THEME } from './themes';
-// @ts-ignore
-import Odometer from 'tm-odometer';
+import TmOdometer from 'tm-odometer';
 import { Observable, Subscription } from 'rxjs';
-import { OdometerModel } from './odometer.model';
-import { TmNgOdometerConfig, TmNgOdometerConfigModel } from './odometer.config';
+import { TmNgOdometerConfig, TmNgOdometerConfigModel } from './tm-ng-odometer.config';
 
 @Component({
     selector: 'tm-ng-odometer',
@@ -39,21 +37,19 @@ import { TmNgOdometerConfig, TmNgOdometerConfigModel } from './odometer.config';
 })
 export class TmNgOdometerComponent implements OnInit, OnDestroy, AfterViewInit {
     private subscription: Subscription;
-    private odometer: OdometerModel;
+    private odometer: TmOdometer;
     container = viewChild<ElementRef>('container');
-    number = input.required<number>(); // Required
+    number = input.required<number>();
     config = input<TmNgOdometerConfigModel>({});
     observable = input<Observable<boolean>>();
 
-    // Individual configuration attributes
-    animation = input<string>();
+    animation = input<'slide' | 'count'>();
     format = input<string>();
     theme = input<string>();
     value = input<number>();
     duration = input<number>();
     auto = input<boolean>();
 
-    // Available themes
     private themes: Array<string> = [
         'car',
         'default',
@@ -86,12 +82,17 @@ export class TmNgOdometerComponent implements OnInit, OnDestroy, AfterViewInit {
         });
     }
 
-    // Start Odometer
     private initOdometer() {
-        if (this.container() !== undefined && typeof Odometer !== 'undefined') {
-            this.odometer = new Odometer({
-                el: this.container().nativeElement,
-                ...this.configSignal()
+        const container = this.container();
+        if (container !== undefined && typeof TmOdometer !== 'undefined') {
+            const { animation, value, duration, format, theme } = this.configSignal();
+            this.odometer = new TmOdometer({
+                el: container.nativeElement,
+                animation,
+                value,
+                duration,
+                format,
+                theme,
             });
 
             if (this.number() !== undefined && this.configSignal().auto) {
@@ -99,10 +100,11 @@ export class TmNgOdometerComponent implements OnInit, OnDestroy, AfterViewInit {
             }
         }
     }
-    
+
     ngOnInit(): void {
-        if (this.observable() !== undefined && !this.configSignal().auto) {
-            this.subscription = this.observable().subscribe((trigger: boolean) => {
+        const observable = this.observable();
+        if (observable !== undefined && !this.configSignal().auto) {
+            this.subscription = observable.subscribe((trigger: boolean) => {
                 if (trigger !== undefined && trigger) {
                     this.odometer.update(this.number());
                 }
